@@ -66,8 +66,10 @@ class Cat(pygame.sprite.Sprite):
 		self.rect.bottom = SCREENRECT.bottom - 100
 		self.img_src = self.image
 		
+		# set maximum movement speed
 		self.maxdx = 13
 		self.dead = False
+	
 	def update(self):
 		# android mouse position is (0, 0) when finger is lifted
 		if pygame.mouse.get_pos() == (0,0) and android:
@@ -76,17 +78,17 @@ class Cat(pygame.sprite.Sprite):
 			mousex = pygame.mouse.get_pos()[0]
 			mousey = pygame.mouse.get_pos()[1]
 		
-			# Rotate cat so he is following the mouse
+			# Rotate cat so she is following the mouse (or finger)
 			center = self.rect.center
 			if center[1] - mousey == 0: angle = 0
 			else: angle = -(180/math.pi) * math.atan(float(mousex - center[0])/(center[1] -mousey))
 		
 			if self.dead:
+				# change cat sprite and move toward the top of the screen
 				self.img_src = self.again_image
-				#self.image = self.again_image
 				self.rect = self.image.get_rect()
 				self.rect.top = SCREENRECT.top + 200
-				#self.rect.centerx = SCREENRECT.centerx
+
 				
 			rotimage = pygame.transform.rotate(self.img_src, angle)
 			rotrect = rotimage.get_rect(center=self.rect.center)
@@ -120,6 +122,7 @@ class Yarn(pygame.sprite.Sprite):
 	speed = 14
 	angleleft = 135
 	angleright = 45
+	
 	def __init__(self):
 		pygame.sprite.Sprite.__init__(self, self.containers)
 		self.rect = self.image.get_rect()
@@ -130,22 +133,25 @@ class Yarn(pygame.sprite.Sprite):
 		# start yarn in a random position on the top of the screen
 		self.rect.centerx = random.randint(1, SCREENRECT.width)
 	def start(self):
-		
 		self.rect.top = SCREENRECT.top
 		
+		# Decide if yarn should drop
 		if pygame.mouse.get_pressed()[0] ==1 or (self.score.score > 0):
 			self.setfp()
 			self.dx = 0
 			self.dy = self.speed
 			self.update = self.move
+			
 	def setfp(self):
 		self.fpx = float(self.rect.centerx)
 		self.fpy = float(self.rect.centery)
+		
 	def setint(self):
 		self.rect.centerx = int(round(self.fpx))
 		self.rect.centery = int(round(self.fpy))
+		
 	def move(self):
-		#check for cat yarn collision
+		#check for cat:yarn collision
 		if self.rect.colliderect(self.cat.hbox) and self.dy > 0:
 			x1 = self.cat.hbox.right
 			y1 = self.angleright
@@ -170,10 +176,12 @@ class Yarn(pygame.sprite.Sprite):
 		self.fpy = self.fpy + self.dy
 		self.setint()
 		
+		# Decide what happens when yarn wants to go off-screen
 		if not SCREENRECT.contains(self.rect):
 			if self.rect.bottom > SCREENRECT.bottom:
 				self.kill()
 				self.score.lifechange()
+			
 			else:
 				if self.rect.left < SCREENRECT.left or self.rect.right > SCREENRECT.right:
 					self.dx = -self.dx
@@ -193,9 +201,9 @@ class Yarn(pygame.sprite.Sprite):
 				
 
 class Sound(pygame.sprite.Sprite):
+	""" Class for sound and mute button"""
 	def __init__(self):
 		pygame.sprite.Sprite.__init__(self, self.containers)
-		
 		
 		if not self.muted:
 			play_music('data\Who Likes to Party.mp3', -1)
@@ -213,17 +221,15 @@ class Sound(pygame.sprite.Sprite):
 		self.muted = not self.muted
 		if self.muted:
 			self.image = self.muted_image
-			
-			#mixer.set_num_channels(0)
 			mixer.music.pause()
 		else:
 			self.image = self.unmuted_image
 			mixer.music.play()
-			#mixer.set_num_channels(8)
 			
 		
 		
 class Score(object):
+	""" Object to keep track of the score """
 	def __init__(self, hi_score):
 		self.score = 0
 		self.lives = 9
@@ -265,13 +271,12 @@ def main():
 		android.init()
 		android.map_key(android.KEYCODE_BACK, pygame.K_ESCAPE)
 	
+	# Define image and song locations
 	Cat.play_image = get_image("data\marie_small.png")
 	Cat.again_image = get_image("data\marie_again.png")
 	Yarn.image = get_image('data\yarn_new.png')
-	
 	Sound.unmuted_image = get_image("data\sound_on.png")
 	Sound.muted_image = get_image("data\sound_off.png")
-	
 	
 	pygame.display.set_icon(get_image('data\marie_square.png'))
 	pygame.display.set_caption('CatYarn!')
@@ -288,20 +293,21 @@ def main():
 		hi_score = 0
 		Sound.muted = False
 		
-	
 	#make background
 	background = pygame.Surface(SCREENRECT.size).convert()
 	background.fill((0, 0, 255))
 	
+	# Currently backgrounds are the same, but could depend on platform
 	if android:
 		yarn_bg = get_image('data\BG_android.jpg')
 	else: 
 		yarn_bg = get_image('data\BG_android.jpg')
-		
+	
+	# Screen Blit background
 	screen.blit(yarn_bg, (0, 0))
 	pygame.display.update()
 	
-	#keep track of sprites
+	#keep track of sprites - lump them into groups
 	yarns = pygame.sprite.Group()
 	Yarn.yarns = yarns
 	
@@ -322,14 +328,11 @@ def main():
 	sound = Sound()
 	
 	#Sent font and render static text
-	#font = pygame.font.SysFont('algerian', 72)
 	font = pygame.font.Font('vademecum.ttf', 80)
 	scoretext = font.render('Score: ', True, (0, 255, 0))
 	livestext = font.render('Lives: ', True, (255, 0, 0))
 	hitext = font.render('Hi: ', True, (0, 0, 255))
 	Score.font = font
-	
-	
 	
 	Score.sound = sound
 	score = Score(hi_score)
@@ -338,7 +341,6 @@ def main():
 	Yarn.score = score #feed score to yarn - for new yarns dropping after 3 hit
 	
 	#game loop
-
 	while 1:
 		
 		if android:
@@ -367,10 +369,11 @@ def main():
 		all.clear(screen, background)
 		
 		
-		
+		# if you lost a yarn but still have lives:
 		if len(yarns.sprites()) < 1 and score.lives > 0:
 			Yarn()
 		
+		# Game Over events
 		if score.lives == 0:
 			if score.just_died:
 				mixer.music.stop()
@@ -386,8 +389,6 @@ def main():
 				if cat.rect.collidepoint(pygame.mouse.get_pos()):
 					if not sound.muted:
 						mixer.music.play()
-					
-					
 						
 					score.score = -1
 					score.update()
@@ -409,16 +410,15 @@ def main():
 		hiprint = screen.blit(hitext, (20, livesrect.bottom))
 		hinum = screen.blit(score.img_hi, (hiprint.right, livesrect.bottom))
 		
-		#pygame.draw.rect(screen, (255, 0, 0), cat.hbox, 1) #draw hitbox
+		#pygame.draw.rect(screen, (255, 0, 0), cat.hbox, 1) #draw hitbox for debugging
 		pygame.display.flip()
-		
-		
 		
 		# maintain frame rate
 		clock.tick(60)
+		
+		#Uncomment next line to display FPS in window title
 		#pygame.display.set_caption('CatYarn!      FPS: '+ str(clock.get_fps()))
 		
-	
 		
 if __name__ == "__main__":
     main()
