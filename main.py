@@ -166,11 +166,12 @@ class Yarn(pygame.sprite.Sprite):
 			
 			if self.score != 0: self.score.update()
 			
+			# increase speed of active yarns every time score increases by 10
 			if float(self.score.score) % 10 == 0 and self.score.score != 0:
 				yrn_list = self.yarns.sprites()
 				for i in range(len(yrn_list)):
 					yrn_list[i].speed += 2
-					print yrn_list[i].speed
+					#print yrn_list[i].speed #display yarn speed in terminal
 			
 		self.fpx = self.fpx + self.dx
 		self.fpy = self.fpy + self.dy
