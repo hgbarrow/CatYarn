@@ -1,5 +1,4 @@
-# CatYarn!
-###Created by Henry Barrow###
+# CatYarn! by Henry Barrow
 
 CatYarn! is the ultimate cat and yarn simulator. 
 
