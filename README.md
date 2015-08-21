@@ -1,10 +1,10 @@
 # CatYarn! by Henry Barrow
 
-CatYarn! is the ultimate cat and yarn simulator. 
+##CatYarn! is the ultimate cat and yarn simulator. ##
 
-Watch the trailer: https://youtu.be/_bG-5ydRdsY
+###Watch the trailer: [YouTube](https://youtu.be/_bG-5ydRdsY)###
 
-Free Android download: https://play.google.com/store/apps/details?id=com.catyarn.program
+###Free Android download: [Google Play Store](https://play.google.com/store/apps/details?id=com.catyarn.program)###
 
 To play, launch main.py
 Python 2.7 is needed - get it here: https://www.python.org/downloads/
