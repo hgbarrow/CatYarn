@@ -15,7 +15,7 @@ except ImportError:
 	import android.mixer as mixer
 
 # Set screen resolution
-SCREENRECT = Rect(0, 0, 720, 1000)
+SCREENRECT = Rect(0, 0, 720, 800)
 if android:
 	SCREENRECT = Rect(0, 0, 720, 1280)
 
@@ -69,6 +69,10 @@ class Cat(pygame.sprite.Sprite):
 		# set maximum movement speed
 		self.maxdx = 13
 		self.dead = False
+		
+		# initialize rotating conditions
+		self.rotating = False
+		self.rot_angle = 0
 	
 	def update(self):
 		# android mouse position is (0, 0) when finger is lifted
@@ -89,7 +93,14 @@ class Cat(pygame.sprite.Sprite):
 				self.rect = self.image.get_rect()
 				self.rect.top = SCREENRECT.top + 200
 
+			if self.rotating:
+				self.rot_angle = self.rot_angle - 10
+				angle = self.rot_angle
+				if self.rot_angle < -350:
+					self.rotating = False
+					self.rot_angle = 0
 				
+			
 			rotimage = pygame.transform.rotate(self.img_src, angle)
 			rotrect = rotimage.get_rect(center=self.rect.center)
 			self.image = rotimage
@@ -164,7 +175,9 @@ class Yarn(pygame.sprite.Sprite):
 			self.dx = self.speed*math.cos(angle)
 			self.dy = -self.speed*math.sin(angle)
 			
-			if self.score != 0: self.score.update()
+			if self.score != 0: 
+				self.score.update()
+				self.cat.rotating = True
 			
 			# increase speed of active yarns every time score increases by 10
 			if float(self.score.score) % 10 == 0 and self.score.score != 0:
